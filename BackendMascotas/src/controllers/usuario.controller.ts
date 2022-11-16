@@ -1,4 +1,5 @@
 //import {service} from '@loopback/core';
+import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
 import {
   Count,
@@ -19,38 +20,39 @@ import {UsuarioRepository} from '../repositories';
 import {AutenticacionService} from '../services';
 const fetch = require("node-fetch");
 
+//@authenticate("admin")
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository: UsuarioRepository,
     @service(AutenticacionService)
     public servicioAutenticacion: AutenticacionService
-  ) {}
+  ) { }
 
-  @post("/identificarUsuario",{
-    responses:{
-      "200":{
-      description: "Identificación de usuarios"
-    }
+  @post("/identificarUsuario", {
+    responses: {
+      "200": {
+        description: "Identificación de usuarios"
+      }
     }
   })
   async identificarUsuario(
-    @requestBody() credenciales : Credenciales
-    ){
-      let p = await this.servicioAutenticacion.IdentificarUsuario(credenciales.usuario, credenciales.clave);
-      if(p){
-        let token = this.servicioAutenticacion.GenerarTokenJWT(p);
-        return {
-          datos:{
-            nombre: p.nombre,
-            correo: p.correo,
-            id: p.id
-          },
-          tk: token
-        }
-      }else{
-        throw new HttpErrors[401]("Datos inválidos");
+    @requestBody() credenciales: Credenciales
+  ) {
+    let p = await this.servicioAutenticacion.IdentificarUsuario(credenciales.usuario, credenciales.clave);
+    if (p) {
+      let token = this.servicioAutenticacion.GenerarTokenJWT(p);
+      return {
+        datos: {
+          nombre: p.nombre,
+          correo: p.correo,
+          id: p.id
+        },
+        tk: token
       }
+    } else {
+      throw new HttpErrors[401]("Datos inválidos");
+    }
   }
 
   @post('/usuarios')
@@ -88,6 +90,7 @@ export class UsuarioController {
     return p;
   }
 
+  //@authenticate.skip()
   @get('/usuarios/count')
   @response(200, {
     description: 'Usuario model count',
